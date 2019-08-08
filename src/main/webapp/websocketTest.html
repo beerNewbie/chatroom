@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>websocket demo</title>
+</head>
+<body>
+    请输入要发送的信息：
+    <input type="text" id="text">
+    <button onclick="sendMesgToServer()">发送信息</button>
+    <hr>
+    收到服务端信息为：
+    <div id="read_from_server"></div>
+    <hr>
+    <button onclick="closeWebsocket()">关闭websocket</button>
+
+
+    <script>
+        var websoket = null;
+        if ('WebSocket' in window) {
+            //输出到控制台
+            console.log("支持websocket");
+            //后端websocket地址
+            websoket = new WebSocket("ws://localhost:8080/websocket");
+        } else {
+            alert("浏览器不支持websocket!!!请升级到最新版本");
+        }
+
+        //浏览器与服务端建立连接后回调方法
+        websoket.onopen = function () {
+            console.log("websocket连接成功");
+
+        };
+
+        websoket.onerror = function () {
+            console("websocket连接失败");
+        };
+
+        //浏览器收到服务器信息
+        websoket.onmessage = function () {
+            var msg = event.data;
+            flushDiv(msg);
+        };
+
+        //关闭websocket
+        websoket.onclose = function () {
+            closeWebsocket();
+        };
+
+        //窗口关闭时，主动将当前窗口的websocket关闭
+
+        window.onbeforeunload = function () {
+            closeWebsocket();
+        };
+
+        //将浏览器信息添加到服务端
+        function sendMesgToServer() {
+            var msg = document.getElementById("text").value;
+            websoket.send(msg);
+        }
+
+        //刷新当前的div
+        function flushDiv(msg) {
+            document.getElementById("read_from_server").innerText = msg;
+        }
+
+        function closeWebsocket() {
+            websoket.close();
+        }
+
+
+    </script>
+</body>
+</html>
